@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Meta AI</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: orange; /* Background color */
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+    .chatbox {
+        width: 400px;
+        background: #ff8000; /* Darker orange */
+        border-radius: 10px;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+    }
+    h2 {
+        text-align: center;
+        color: #fff9f0;
+        margin: 0 0 10px 0;
+    }
+    #chat {
+        flex: 1;
+        overflow-y: auto;
+        background: #ff9900; /* Lighter orange inside chat */
+        padding: 10px;
+        border: 1px solid #ffa500;
+        margin-bottom: 10px;
+        font-size: 14px;
+        color: black;
+    }
+    .input-area {
+        display: flex;
+    }
+    input {
+        flex: 1;
+        padding: 8px;
+        border-radius: 5px;
+        border: none;
+    }
+    button {
+        margin-left: 5px;
+        padding: 8px;
+        background: #fff9f0;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        color: black;
+        font-weight: bold;
+    }
+</style>
+</head>
+<body>
+
+<div class="chatbox">
+    <h2>🤖 Meta AI</h2>
+    <div id="chat"></div>
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="Ask anything...">
+        <button onclick="send()">Send</button>
+        <button onclick="startVoice()">🎤</button>
+    </div>
+</div>
+
+<script>
+let memory = JSON.parse(localStorage.getItem("metaMemory")) || [];
+
+function send() {
+    let input = document.getElementById("userInput").value;
+    if (!input) return;
+
+    addChat("You", input);
+    memory.push(input);
+    localStorage.setItem("metaMemory", JSON.stringify(memory));
+
+    let reply = getReply(input);
+    addChat("Meta AI", reply);
+    speak(reply);
+
+    document.getElementById("userInput").value = "";
+}
+
+function addChat(sender, text) {
+    let chat = document.getElementById("chat");
+    chat.innerHTML += `<b>${sender}:</b> ${text}<br><br>`;
+    chat.scrollTop = chat.scrollHeight;
+}
+
+function getReply(q) {
+    q = q.toLowerCase();
+
+    // Basic subjects knowledge in English
+    if (q.includes("html")) return "HTML is the language used to create web pages.";
+    if (q.includes("css")) return "CSS is used to style web pages.";
+    if (q.includes("javascript") || q.includes("js")) return "JavaScript adds dynamic behavior to web pages.";
+    if (q.includes("math")) return "Math is the subject that deals with numbers and calculations.";
+    if (q.includes("science")) return "Science is the study of nature and experiments.";
+    if (q.includes("computer")) return "A computer is an electronic machine that processes data.";
+    if (q.includes("memory")) return "I remember your previous messages in browser memory.";
+    if (q.includes("history")) return "History is the study of past events and civilizations.";
+    if (q.includes("geography")) return "Geography is the study of Earth and its locations.";
+    if (q.includes("physics")) return "Physics is the study of matter, energy, and forces.";
+    if (q.includes("chemistry")) return "Chemistry is the study of substances and reactions.";
+    if (q.includes("biology")) return "Biology is the study of living organisms.";
+    if (q.includes("hello") || q.includes("hi")) return "Hello! How are you?";
+
+    return "That's an interesting question! Please ask in more detail 🙂";
+}
+
+// Voice output using SpeechSynthesis
+function speak(text) {
+    if ('speechSynthesis' in window) {
+        let msg = new SpeechSynthesisUtterance(text);
+        msg.lang = 'en-US';
+        window.speechSynthesis.speak(msg);
+    }
+}
+
+// Voice input using SpeechRecognition
+function startVoice() {
+    if (!('webkitSpeechRecognition' in window)) {
+        alert("Sorry, your browser does not support voice input.");
+        return;
+    }
+    let recognition = new webkitSpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.start();
+
+    recognition.onresult = function(event) {
+        let speechResult = event.results[0][0].transcript;
+        document.getElementById("userInput").value = speechResult;
+        send();
+    };
+
+    recognition.onerror = function(event) {
+        console.error(event.error);
+    };
+}
+</script>
+
+</body>
+</html>
